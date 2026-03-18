@@ -1,6 +1,6 @@
 # worknotesai-demo-public
 
-worknotesai helps you capture real work experiences and transform them into interview-ready STAR stories with AI feedback.
+Worknotesai helps you capture real work experiences and transform them into interview-ready STAR stories with AI feedback. Build your professional story bank, one conversation at a time!
 
 ## What This Repo Contains
 
@@ -135,19 +135,12 @@ Set `NEXT_PUBLIC_DEMO_MODE="false"` in `notesai-mvp/frontend/.env.local`, and se
 - Local files (`.env`, `.env.local`) can stay minimal for demo mode.
 - Template files (`.env.example`) include optional Clerk placeholders so reviewers can run full-auth mode with their own credentials.
 
-## What To Test (Downloader / Interviewer Flow)
+## What To Test
 
 1. Open the frontend (demo mode is no-sign-in; full mode uses Clerk sign-in).
 2. Add a work experience entry.
 3. Generate/view STAR-structured output and feedback (requires valid `OPENAI_API_KEY` in backend `.env`).
 4. Verify saved experiences can be revisited.
-
-## Interview Talking Points
-
-- Problem: people struggle to recall and articulate impact stories on demand.
-- Product value: converts unstructured experience notes into structured STAR responses.
-- Technical design: Next.js frontend, Express API, Prisma/Postgres data model, OpenAI-assisted response generation.
-- Tradeoff: optimized for a focused end-to-end MVP experience over broad feature surface area.
 
 ## Notes
 

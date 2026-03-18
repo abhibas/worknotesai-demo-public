@@ -19,7 +19,7 @@ You know the feeling: You've accomplished great things, but when asked "Tell me 
 
 I built worknotesai to fix exactly that. Capture experiences naturally as they happen—via voice or text—in a safe, conversational space. Our AI structures your scattered thoughts into polished STAR responses, grades them, and provides specific improvement suggestions.
 
-But it's more than interview prep—it's your professional story, organized, ready, uniquely yours.
+But it's more than prep—it's your professional story, organized, ready, uniquely yours.
 
 No more "where do I even start?" Try it:
 - Demo Day Experience: [www.worknotesai.com](https://www.worknotesai.com)
