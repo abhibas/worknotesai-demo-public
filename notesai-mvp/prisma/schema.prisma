@@ -1,0 +1,61 @@
+// worknotesAI Database Schema
+// Focus on core functionality only
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String       @id @default(cuid())
+  clerkId   String       @unique
+  email     String
+  experiences Experience[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Experience {
+  id              String     @id @default(cuid())
+  userId          String
+  content         String
+  title           String
+  company         String?
+  role            String?
+  date            String?
+  project         String?
+  experienceTitle String?
+  tags            String?
+  responses       Response[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Response {
+  id            String     @id @default(cuid())
+  experienceId  String
+  starResponse  String
+  score         String?    // Overall letter grade (A+, A, B+, B, C+, C, D, F, N/A)
+  sectionScores String?    // JSON string of individual section scores
+  
+  // Feedback fields (stored but not displayed in UI yet)
+  summaryFeedback          String?  // High-level feedback summary
+  detailedFeedback         String?  // JSON: {situation: "...", task: "...", action: "...", result: "..."}
+  rubricScores            String?  // JSON: {dimension1: "A+", dimension2: "B", ...} - 7 dimensions
+  topStrengths             String?  // JSON array: ["dimension1", "dimension2"]
+  improvementAreas         String?  // JSON array: ["dimension3", "dimension4"]
+  rubricDiagnosticSummary  String?  // Summary text of rubric evaluation
+  skillsHighlighted        String?  // JSON array: ["skill1", "skill2", ...]
+  feedbackQuestions        String?  // JSON array: [{component: "situation", question: "..."}, ...]
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  
+  experience Experience @relation(fields: [experienceId], references: [id])
+}

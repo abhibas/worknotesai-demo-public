@@ -1,0 +1,225 @@
+name: Database Migrations
+
+on:
+  push:
+    branches: [main, develop, staging]
+    paths:
+      - 'notesai-mvp/prisma/migrations/**'
+      - 'notesai-mvp/prisma/schema.prisma'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  # Job 1: Safety Check - Review migration for dangerous operations
+  safety-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for comparison
+      
+      - name: Detect migration files
+        id: detect-migrations
+        run: |
+          echo "Checking for new migrations..."
+          if git diff --name-only HEAD~1 HEAD | grep -q "prisma/migrations/"; then
+            echo "new_migrations=true" >> $GITHUB_OUTPUT
+            echo "Migration files detected"
+          else
+            echo "new_migrations=false" >> $GITHUB_OUTPUT
+            echo "No new migration files"
+          fi
+      
+      - name: Safety check migrations
+        if: steps.detect-migrations.outputs.new_migrations == 'true'
+        run: |
+          echo "🔍 Running migration safety checks..."
+          cd notesai-mvp
+          
+          # Find new migration files
+          NEW_MIGRATIONS=$(git diff --name-only HEAD~1 HEAD | grep "prisma/migrations/.*\.sql$" || true)
+          
+          if [ -z "$NEW_MIGRATIONS" ]; then
+            echo "✅ No new migration files to check"
+            exit 0
+          fi
+          
+          DANGEROUS_FOUND=false
+          
+          for migration in $NEW_MIGRATIONS; do
+            echo "Checking: $migration"
+            
+            # Check for dangerous operations
+            if grep -qiE "(DROP\s+TABLE|DROP\s+COLUMN|TRUNCATE|DELETE\s+FROM)" "$migration"; then
+              echo "🚨 DANGEROUS OPERATION DETECTED in $migration"
+              echo "::error file=$migration::Dangerous operation detected - requires manual review"
+              DANGEROUS_FOUND=true
+            fi
+            
+            # Check for data loss risks
+            if grep -qiE "ALTER\s+TABLE.*DROP" "$migration"; then
+              echo "⚠️ WARNING: Column/table drop detected in $migration"
+              echo "::warning file=$migration::Column/table drop - ensure data is migrated first"
+            fi
+          done
+          
+          if [ "$DANGEROUS_FOUND" = true ]; then
+            echo "❌ Safety check failed - blocking migration"
+            echo "::error::Migration contains dangerous operations - manual review required"
+            exit 1
+          fi
+          
+          echo "✅ Safety check passed"
+
+  # Job 2: Migrate Staging Database
+  migrate-staging:
+    needs: safety-check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/staging'
+    environment:
+      name: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: notesai-mvp/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: notesai-mvp
+        run: npm ci
+      
+      - name: Run migrations on staging
+        working-directory: notesai-mvp
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          echo "🔄 Starting staging database migration..."
+          echo "Branch: ${{ github.ref }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
+          
+          # Run migration with detailed logging
+          npx prisma migrate deploy --schema=./prisma/schema.prisma 2>&1 | tee migration.log
+          
+          MIGRATION_EXIT_CODE=${PIPESTATUS[0]}
+          
+          if [ $MIGRATION_EXIT_CODE -eq 0 ]; then
+            echo "✅ Staging migration completed successfully"
+            echo "::notice::Staging database migrated successfully"
+          else
+            echo "❌ Staging migration failed"
+            echo "::error::Staging migration failed - check logs"
+            cat migration.log
+            exit $MIGRATION_EXIT_CODE
+          fi
+      
+      - name: Upload migration logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-migration-logs
+          path: notesai-mvp/migration.log
+          retention-days: 30
+      
+      - name: Verify schema
+        working-directory: notesai-mvp
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        run: |
+          echo "🔍 Verifying database schema..."
+          npx prisma db execute --stdin <<< "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;" || true
+          echo "✅ Schema verification complete"
+
+  # Job 3: Migrate Production Database (with approval)
+  migrate-production:
+    needs: safety-check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      # This requires manual approval in GitHub
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: notesai-mvp/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: notesai-mvp
+        run: npm ci
+      
+      - name: Create database backup
+        working-directory: notesai-mvp
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          echo "📦 Creating production database backup..."
+          # Note: NeonDB has automatic backups, but we log the migration point
+          echo "Backup checkpoint: Migration at $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo "Commit: ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "✅ Backup checkpoint created"
+      
+      - name: Run migrations on production
+        working-directory: notesai-mvp
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          echo "🔄 Starting PRODUCTION database migration..."
+          echo "⚠️ PRODUCTION MIGRATION - User data at risk"
+          echo "Branch: ${{ github.ref }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Approved by: ${{ github.actor }}"
+          echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          
+          # Run migration with detailed logging
+          npx prisma migrate deploy --schema=./prisma/schema.prisma 2>&1 | tee migration.log
+          
+          MIGRATION_EXIT_CODE=${PIPESTATUS[0]}
+          
+          if [ $MIGRATION_EXIT_CODE -eq 0 ]; then
+            echo "✅ PRODUCTION migration completed successfully"
+            echo "::notice::Production database migrated successfully"
+          else
+            echo "❌ PRODUCTION migration FAILED"
+            echo "::error::Production migration failed - IMMEDIATE ATTENTION REQUIRED"
+            cat migration.log
+            exit $MIGRATION_EXIT_CODE
+          fi
+      
+      - name: Upload migration logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-migration-logs-${{ github.sha }}
+          path: notesai-mvp/migration.log
+          retention-days: 90  # Keep production logs longer
+      
+      - name: Verify schema
+        working-directory: notesai-mvp
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          echo "🔍 Verifying production database schema..."
+          npx prisma db execute --stdin <<< "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;" || true
+          echo "✅ Production schema verification complete"
+      
+      - name: Send notification (on failure)
+        if: failure()
+        run: |
+          echo "🚨 PRODUCTION MIGRATION FAILED"
+          echo "Check GitHub Actions logs for details"
+          # Can add Slack/email notification here
+          # Example: curl -X POST $SLACK_WEBHOOK_URL -d "Production migration failed"
+

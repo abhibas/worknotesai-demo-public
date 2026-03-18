@@ -1,0 +1,13 @@
+{
+  "name": "worknotesai-demo-public",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Public demo repository for worknotesAI.",
+  "scripts": {
+    "test": "echo \"No root test suite configured.\"",
+    "check": "echo \"Run checks in notesai-mvp and notesai-mvp/frontend.\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
