@@ -12,10 +12,11 @@ worknotesai helps you capture real work experiences and transform them into inte
 
 ### Live Demo (No Local Setup)
 
-If you publish a hosted preview, add it here so reviewers can try the app without installing anything.
+Reviewers can evaluate the live product directly without local setup:
 
-- Frontend URL: `<add-your-hosted-frontend-url>`
-- Backend/API URL: `<add-your-hosted-backend-url>`
+- Primary live app: [www.worknotesai.com](https://www.worknotesai.com)
+- Future work / ongoing direction: [www.careernotesai.com](https://www.careernotesai.com)
+- If the hosted backend/API endpoint is exposed separately, add it here: `<add-your-hosted-backend-url>`
 
 For hosted deployments, point backend `DATABASE_URL` to a hosted PostgreSQL instance (for example Neon/Supabase/Railway), then set frontend to call that backend URL.
 
