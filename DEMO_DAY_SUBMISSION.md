@@ -8,8 +8,8 @@ With worknotesai, you can capture experiences as they happen—via voice or text
 Build your professional story bank, one experience at a time. Every experience you capture builds a deeper understanding of your professional journey—organized, ready, and uniquely yours.
 
 So, how was work? Tell me what's on your mind:
-- [www.worknotesai.com](https://www.worknotesai.com)
-- [www.careernotesai.com](https://www.careernotesai.com) (future work)
+- Demo Day Experience: [www.worknotesai.com](https://www.worknotesai.com)
+- Current Experience: [www.careernotesai.com](https://www.careernotesai.com)
 
 ### Selected LinkedIn Post Content (FINALIZED - Option 1 Refined):
 
@@ -22,7 +22,7 @@ I built worknotesai to fix exactly that. Capture experiences naturally as they h
 But it's more than interview prep—it's your professional story, organized, ready, uniquely yours.
 
 No more "where do I even start?" Try it:
-- [www.worknotesai.com](https://www.worknotesai.com)
-- [www.careernotesai.com](https://www.careernotesai.com) (future work)
+- Demo Day Experience: [www.worknotesai.com](https://www.worknotesai.com)
+- Current Experience: [www.careernotesai.com](https://www.careernotesai.com)
 
 #AI #ProductManagement #CareerGrowth #InterviewPrep #021 #ZerotoOne #soloAI
