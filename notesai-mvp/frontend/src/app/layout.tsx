@@ -46,7 +46,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const demoMode = (process.env.NEXT_PUBLIC_DEMO_MODE || 'false').toLowerCase() === 'true';
+  const demoMode = (process.env.NEXT_PUBLIC_DEMO_MODE || 'true').toLowerCase() === 'true';
   const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
   if (demoMode) {

@@ -1,11 +1,12 @@
+require('dotenv').config();
+
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const OpenAI = require('openai');
 const ProviderFactory = require('./providers');
 const cors = require('cors');
 
 const app = express();
-const DEMO_MODE = (process.env.DEMO_MODE || 'false').toLowerCase() === 'true';
+const DEMO_MODE = (process.env.DEMO_MODE || 'true').toLowerCase() === 'true';
 
 // Initialize Prisma with error handling
 let prisma;
@@ -17,11 +18,6 @@ try {
   console.error('Make sure to run: npx prisma generate');
   process.exit(1);
 }
-
-// Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Middleware
 app.use(cors({

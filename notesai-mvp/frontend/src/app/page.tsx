@@ -12,7 +12,7 @@ import { API_URL } from '@/lib/api';
 import { devLog } from '@/utils/devLogger';
 
 export default function Home() {
-  const demoMode = (process.env.NEXT_PUBLIC_DEMO_MODE || 'false').toLowerCase() === 'true';
+  const demoMode = (process.env.NEXT_PUBLIC_DEMO_MODE || 'true').toLowerCase() === 'true';
   const clerkUser = demoMode ? null : useUser();
   const clerkAuth = demoMode ? null : useAuth();
   const isSignedIn = demoMode ? true : !!clerkUser?.isSignedIn;

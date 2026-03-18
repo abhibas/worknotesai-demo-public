@@ -69,7 +69,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 function DashboardContent() {
-  const demoMode = (process.env.NEXT_PUBLIC_DEMO_MODE || 'false').toLowerCase() === 'true';
+  const demoMode = (process.env.NEXT_PUBLIC_DEMO_MODE || 'true').toLowerCase() === 'true';
   const clerkUser = demoMode ? null : useUser();
   const clerkAuth = demoMode ? null : useAuth();
   const isSignedIn = demoMode ? true : !!clerkUser?.isSignedIn;
@@ -1327,16 +1327,13 @@ function DashboardContent() {
         // Show success message
         setShowSuccessMessage(true);
       } else {
-        // Get error details from response
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('Error saving experience - Response:', response.status, errorData);
-        console.error('API URL:', API_URL);
-        console.error('Request body:', requestBody);
-          alert(`Unable to save experience: ${errorData.error || response.statusText || 'Unknown error'}. Please try again.`);
+        const errorMessage = errorData?.error || response.statusText || 'Unknown error';
+        console.error('Error saving experience:', response.status, errorMessage);
+        alert(`Unable to save experience: ${errorMessage}. Please try again.`);
       }
     } catch (error) {
       console.error('Error saving experience:', error);
-      console.error('API URL:', API_URL);
       alert(`Network error: ${error instanceof Error ? error.message : 'Failed to connect to server'}. Please check your internet connection and try again.`);
     } finally {
       setIsSubmitting(false);
@@ -1672,11 +1669,11 @@ function DashboardContent() {
           setInProgressExperiences(prev => sortExperiencesByRecent(prev.filter(exp => exp.id !== experience.id)));
         }
       } else {
-        // Try to get error message from response
         try {
           const errorData = await response.json();
-          console.error('STAR generation error:', errorData);
-          alert(`Unable to generate STAR response: ${errorData.error || 'Unknown error'}. Please try again.`);
+          const errorMessage = errorData?.error || response.statusText || 'Unknown error';
+          console.error('STAR generation error:', response.status, errorMessage);
+          alert(`Unable to generate STAR response: ${errorMessage}. Please try again.`);
         } catch (e) {
           console.error('Error parsing error response:', e);
           alert(`Unable to generate STAR response. Please try again.`);

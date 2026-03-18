@@ -39,7 +39,7 @@ export default function FeedbackCard({
   saveAllRef,
   saveEditFormAndGetContent, // Callback to save edit form and get updated content
 }: FeedbackCardProps) {
-  const demoMode = (process.env.NEXT_PUBLIC_DEMO_MODE || 'false').toLowerCase() === 'true';
+  const demoMode = (process.env.NEXT_PUBLIC_DEMO_MODE || 'true').toLowerCase() === 'true';
   const clerkAuth = demoMode ? null : useAuth();
   const getToken = demoMode
     ? async () => null
