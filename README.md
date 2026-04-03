@@ -8,6 +8,20 @@ Worknotesai helps you capture real work experiences and transform them into inte
 - `notesai-mvp/frontend/`: frontend app (Next.js, with optional Clerk auth)
 - `DEMO_DAY_SUBMISSION.md`: project description and public-facing narrative
 
+## Screenshots
+
+Home:
+
+![Home](assets/screenshots/home.png)
+
+Dashboard:
+
+![Dashboard](assets/screenshots/dashboard.png)
+
+Capture experience:
+
+![Capture experience](assets/screenshots/shareexperience.png)
+
 ## Quickstart
 
 ### Live Demo (No Local Setup)
